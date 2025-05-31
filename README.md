@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/4/43/Cisco_Packet_Tracer_screenshot.png" width="300" alt="Cisco Packet Tracer">
+  
 </p>
 
 <h2 align="center">🖧 Computer Networks</h2>
