@@ -1,0 +1,278 @@
+1. HUB ROUTER CONFIGURATION (1.1.1.1)
+-------------------------------------
+
+enable
+configure terminal
+
+interface FastEthernet0/0
+ ip address 10.0.0.1 255.255.255.0
+ no shutdown
+
+interface FastEthernet0/1
+ ip address 1.1.1.1 255.255.255.0
+ no shutdown
+
+interface Tunnel1
+ ip address 192.168.100.1 255.255.255.0
+ tunnel source FastEthernet0/1
+ tunnel destination 2.2.2.2
+
+interface Tunnel2
+ ip address 192.168.100.1 255.255.255.0
+ tunnel source FastEthernet0/1
+ tunnel destination 3.3.3.3
+
+interface Tunnel3
+ ip address 192.168.100.1 255.255.255.0
+ tunnel source FastEthernet0/1
+ tunnel destination 4.4.4.4
+
+interface Tunnel4
+ ip address 192.168.100.1 255.255.255.0
+ tunnel source FastEthernet0/1
+ tunnel destination 5.5.5.5
+
+crypto isakmp policy 10
+ encr aes
+ hash sha
+ authentication pre-share
+ group 2
+
+crypto isakmp key noman address 2.2.2.2
+crypto isakmp key noman address 3.3.3.3
+crypto isakmp key noman address 4.4.4.4
+crypto isakmp key noman address 5.5.5.5
+
+crypto ipsec transform-set MY_TRANSFORM esp-aes esp-sha-hmac
+
+access-list 101 permit ip 10.0.0.0 0.0.0.255 10.1.0.0 0.0.0.255
+access-list 102 permit ip 10.0.0.0 0.0.0.255 10.2.0.0 0.0.0.255
+access-list 103 permit ip 10.0.0.0 0.0.0.255 10.3.0.0 0.0.0.255
+access-list 104 permit ip 10.0.0.0 0.0.0.255 10.4.0.0 0.0.0.255
+
+crypto map MY_MAP 10 ipsec-isakmp
+ set peer 2.2.2.2
+ set transform-set MY_TRANSFORM
+ match address 101
+
+crypto map MY_MAP 20 ipsec-isakmp
+ set peer 3.3.3.3
+ set transform-set MY_TRANSFORM
+ match address 102
+
+crypto map MY_MAP 30 ipsec-isakmp
+ set peer 4.4.4.4
+ set transform-set MY_TRANSFORM
+ match address 103
+
+crypto map MY_MAP 40 ipsec-isakmp
+ set peer 5.5.5.5
+ set transform-set MY_TRANSFORM
+ match address 104
+
+interface FastEthernet0/1
+ crypto map MY_MAP
+
+exit
+write memory
+
+
+
+2. SPOKE ROUTERS CONFIGURATION
+------------------------------
+
+Spoke1 (2.2.2.2)
+-----------------
+enable
+configure terminal
+
+interface FastEthernet0/0
+ ip address 10.1.0.1 255.255.255.0
+ no shutdown
+
+interface FastEthernet0/1
+ ip address 2.2.2.2 255.255.255.0
+ no shutdown
+
+interface Tunnel0
+ ip address 192.168.100.2 255.255.255.0
+ tunnel source FastEthernet0/1
+ tunnel destination 1.1.1.1
+
+crypto isakmp policy 10
+ encr aes
+ hash sha
+ authentication pre-share
+ group 2
+
+crypto isakmp key noman address 1.1.1.1
+
+crypto ipsec transform-set MY_TRANSFORM esp-aes esp-sha-hmac
+
+access-list 100 permit ip 10.1.0.0 0.0.0.255 10.0.0.0 0.0.0.255
+
+crypto map MY_MAP 10 ipsec-isakmp
+ set peer 1.1.1.1
+ set transform-set MY_TRANSFORM
+ match address 100
+
+interface FastEthernet0/1
+ crypto map MY_MAP
+
+ip route 10.0.0.0 255.255.255.0 192.168.100.1
+
+exit
+write memory
+
+Spoke2 (3.3.3.3)
+----------------
+enable
+configure terminal
+
+interface FastEthernet0/0
+ ip address 10.2.0.1 255.255.255.0
+ no shutdown
+
+interface FastEthernet0/1
+ ip address 3.3.3.3 255.255.255.0
+ no shutdown
+
+interface Tunnel0
+ ip address 192.168.100.3 255.255.255.0
+ tunnel source FastEthernet0/1
+ tunnel destination 1.1.1.1
+
+crypto isakmp policy 10
+ encr aes
+ hash sha
+ authentication pre-share
+ group 2
+
+crypto isakmp key noman address 1.1.1.1
+
+crypto ipsec transform-set MY_TRANSFORM esp-aes esp-sha-hmac
+
+access-list 100 permit ip 10.2.0.0 0.0.0.255 10.0.0.0 0.0.0.255
+
+crypto map MY_MAP 10 ipsec-isakmp
+ set peer 1.1.1.1
+ set transform-set MY_TRANSFORM
+ match address 100
+
+interface FastEthernet0/1
+ crypto map MY_MAP
+
+ip route 10.0.0.0 255.255.255.0 192.168.100.1
+
+exit
+write memory
+
+Spoke3 (4.4.4.4)
+----------------
+enable
+configure terminal
+
+interface FastEthernet0/0
+ ip address 10.3.0.1 255.255.255.0
+ no shutdown
+
+interface FastEthernet0/1
+ ip address 4.4.4.4 255.255.255.0
+ no shutdown
+
+interface Tunnel0
+ ip address 192.168.100.4 255.255.255.0
+ tunnel source FastEthernet0/1
+ tunnel destination 1.1.1.1
+
+crypto isakmp policy 10
+ encr aes
+ hash sha
+ authentication pre-share
+ group 2
+
+crypto isakmp key noman address 1.1.1.1
+
+crypto ipsec transform-set MY_TRANSFORM esp-aes esp-sha-hmac
+
+access-list 100 permit ip 10.3.0.0 0.0.0.255 10.0.0.0 0.0.0.255
+
+crypto map MY_MAP 10 ipsec-isakmp
+ set peer 1.1.1.1
+ set transform-set MY_TRANSFORM
+ match address 100
+
+interface FastEthernet0/1
+ crypto map MY_MAP
+
+ip route 10.0.0.0 255.255.255.0 192.168.100.1
+
+exit
+write memory
+
+Spoke4 (5.5.5.5)
+----------------
+enable
+configure terminal
+
+interface FastEthernet0/0
+ ip address 10.4.0.1 255.255.255.0
+ no shutdown
+
+interface FastEthernet0/1
+ ip address 5.5.5.5 255.255.255.0
+ no shutdown
+
+interface Tunnel0
+ ip address 192.168.100.5 255.255.255.0
+ tunnel source FastEthernet0/1
+ tunnel destination 1.1.1.1
+
+crypto isakmp policy 10
+ encr aes
+ hash sha
+ authentication pre-share
+ group 2
+
+crypto isakmp key noman address 1.1.1.1
+
+crypto ipsec transform-set MY_TRANSFORM esp-aes esp-sha-hmac
+
+access-list 100 permit ip 10.4.0.0 0.0.0.255 10.0.0.0 0.0.0.255
+
+crypto map MY_MAP 10 ipsec-isakmp
+ set peer 1.1.1.1
+ set transform-set MY_TRANSFORM
+ match address 100
+
+interface FastEthernet0/1
+ crypto map MY_MAP
+
+ip route 10.0.0.0 255.255.255.0 192.168.100.1
+
+exit
+write memory
+
+4. SWITCH BASIC CONFIG (same for all switches)
+------------------------------------------------
+enable
+configure terminal
+
+interface range FastEthernet0/1 - 4
+ switchport mode access
+ switchport access vlan 1
+ no shutdown
+
+exit
+write memory
+
+5. VERIFICATION COMMANDS
+---------------------------
+show ip interface brief
+show interface tunnel0
+show crypto isakmp sa
+show crypto ipsec sa
+
+ping <PC IP in other sites>
+
+
